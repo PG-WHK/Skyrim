@@ -1,0 +1,3 @@
+* text=auto eol=lf
+# Preserve the exact release-source snapshot, including original line endings.
+/patches/scie-1.7.104/source/** -text

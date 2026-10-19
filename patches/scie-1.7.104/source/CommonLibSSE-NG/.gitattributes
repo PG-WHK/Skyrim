@@ -1,0 +1,10 @@
+# Auto detect text files and perform LF normalization
+* text=auto
+
+*.as linguist-language=ActionScript
+\!Update.ps1 linguist-vendored
+
+# Ensure Windows batch scripts always use CRLF
+*.cmd text eol=crlf
+# Preserve the archived source bytes in this review repository.
+* -text

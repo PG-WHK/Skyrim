@@ -1,0 +1,7 @@
+# Generated build files; vendored directories named "build" contain source scripts.
+/patches/scie-1.7.104/build/
+/patches/scie-1.7.104/source/build/
+/.vs/
+*.user
+*.suo
+/patches/scie-1.7.104/source/third_party/fmt/run-msbuild.bat

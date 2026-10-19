@@ -1,0 +1,18 @@
+{
+  "version": "2.6.0-r1",
+  "runtime": "1.7.104.0",
+  "code_sections_unchanged": true,
+  "exports_unchanged": true,
+  "sanitized_source_root_occurrences": 37,
+  "dll_sha256": "92f72a86fc95fb5ad2c7778ce2246a50c96849bcd1d594e327bc6ccbd555c070",
+  "files": {
+    "SCIE-1.7.104-Compatibility-Patch-r1.zip": {
+      "bytes": 784248,
+      "sha256": "566219373693d687d98d51a4f7a4d40baca9bf0ebfba0cb688d4139fe289053b"
+    },
+    "SCIE-1.7.104-Compatibility-Patch-r1-Source.zip": {
+      "bytes": 7363604,
+      "sha256": "70c9d88887d07de87065b49a1df3daba24c9f9e07942adeb357580e3d504a6f1"
+    }
+  }
+}

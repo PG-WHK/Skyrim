@@ -1,0 +1,126 @@
+diff --git a/include/PCH.h b/include/PCH.h
+index 40c99e7..de66bb1 100644
+--- a/include/PCH.h
++++ b/include/PCH.h
+@@ -34,3 +34,11 @@ namespace logger = SKSE::log;
+ namespace stl {
+     using namespace SKSE::stl;
+ }
++// Compatibility shim preserving the upstream HUD notification API.
++namespace RE {
++inline void DebugNotification(const char* text, const char* sound = nullptr, bool cancel = true) {
++    using Fn = void(const char*, const char*, bool);
++    static REL::Relocation<Fn> notify{REL::RelocationID(52050, 52933)};
++    notify(text, sound, cancel);
++}
++}
+diff --git a/src/Services/ContainerManager.cpp b/src/Services/ContainerManager.cpp
+index abc345d..65f10f2 100644
+--- a/src/Services/ContainerManager.cpp
++++ b/src/Services/ContainerManager.cpp
+@@ -298,7 +298,7 @@ namespace Services {
+         int containerRefs = 0;
+ 
+         int mountRefs = 0;
+-        m_cachedCell->ForEachReference([this, &totalRefs, &containerRefs, &mountRefs](RE::TESObjectREFR& ref) {
++        m_cachedCell->ForEachReference([this, &totalRefs, &containerRefs, &mountRefs](RE::TESObjectREFR* refPtr) { if (!refPtr) return RE::BSContainer::ForEachResult::kContinue; auto& ref = *refPtr;
+             totalRefs++;
+ 
+             // Check if it's a container
+@@ -437,7 +437,7 @@ namespace Services {
+         auto playerPos = player->GetPosition();
+ 
+         std::vector<RE::TESObjectREFR*> result;
+-        currentCell->ForEachReference([this, &result, &playerPos, maxDist](RE::TESObjectREFR& ref) {
++        currentCell->ForEachReference([this, &result, &playerPos, maxDist](RE::TESObjectREFR* refPtr) { if (!refPtr) return RE::BSContainer::ForEachResult::kContinue; auto& ref = *refPtr;
+             if (IsPlayerFollower(&ref)) {
+                 float distance = playerPos.GetDistance(ref.GetPosition());
+                 if (distance <= maxDist) {
+@@ -551,3 +551,4 @@ namespace Services {
+         return containerRef;
+     }
+ }
++
+diff --git a/src/Services/ContainerRegistry.cpp b/src/Services/ContainerRegistry.cpp
+index 4a2e86c..87c7331 100644
+--- a/src/Services/ContainerRegistry.cpp
++++ b/src/Services/ContainerRegistry.cpp
+@@ -335,7 +335,7 @@ namespace Services {
+ 
+         std::uint32_t count = 0;
+ 
+-        cell->ForEachReference([&](RE::TESObjectREFR& ref) {
++        cell->ForEachReference([&](RE::TESObjectREFR* refPtr) { if (!refPtr) return RE::BSContainer::ForEachResult::kContinue; auto& ref = *refPtr;
+             auto* baseObj = ref.GetBaseObject();
+             if (!baseObj || baseObj->GetFormType() != RE::FormType::Container) {
+                 return RE::BSContainer::ForEachResult::kContinue;
+@@ -411,7 +411,7 @@ namespace Services {
+         // Collect player-enabled containers in current cell
+         std::vector<std::tuple<std::string, std::uint32_t, std::string>> entries;  // plugin, localID, editorID
+ 
+-        cell->ForEachReference([&](RE::TESObjectREFR& ref) {
++        cell->ForEachReference([&](RE::TESObjectREFR* refPtr) { if (!refPtr) return RE::BSContainer::ForEachResult::kContinue; auto& ref = *refPtr;
+             auto* baseObj = ref.GetBaseObject();
+             if (!baseObj || baseObj->GetFormType() != RE::FormType::Container) {
+                 return RE::BSContainer::ForEachResult::kContinue;
+@@ -508,7 +508,7 @@ namespace Services {
+         // Collect FormIDs of containers in cell
+         std::vector<RE::FormID> containerIDs;
+ 
+-        cell->ForEachReference([&](RE::TESObjectREFR& ref) {
++        cell->ForEachReference([&](RE::TESObjectREFR* refPtr) { if (!refPtr) return RE::BSContainer::ForEachResult::kContinue; auto& ref = *refPtr;
+             auto* baseObj = ref.GetBaseObject();
+             if (!baseObj || baseObj->GetFormType() != RE::FormType::Container) {
+                 return RE::BSContainer::ForEachResult::kContinue;
+@@ -551,7 +551,7 @@ namespace Services {
+         auto playerPos = player->GetPosition();
+         float maxRadius = a_maxDistance > 0.0f ? a_maxDistance : INISettings::GetSingleton()->GetMaxContainerDistance();
+ 
+-        cell->ForEachReference([&](RE::TESObjectREFR& ref) {
++        cell->ForEachReference([&](RE::TESObjectREFR* refPtr) { if (!refPtr) return RE::BSContainer::ForEachResult::kContinue; auto& ref = *refPtr;
+             auto* baseObj = ref.GetBaseObject();
+             if (!baseObj || baseObj->GetFormType() != RE::FormType::Container) {
+                 return RE::BSContainer::ForEachResult::kContinue;
+@@ -593,7 +593,7 @@ namespace Services {
+         auto playerPos = player->GetPosition();
+         float maxRadius = a_maxDistance > 0.0f ? a_maxDistance : INISettings::GetSingleton()->GetMaxContainerDistance();
+ 
+-        cell->ForEachReference([&](RE::TESObjectREFR& ref) {
++        cell->ForEachReference([&](RE::TESObjectREFR* refPtr) { if (!refPtr) return RE::BSContainer::ForEachResult::kContinue; auto& ref = *refPtr;
+             auto* baseObj = ref.GetBaseObject();
+             if (!baseObj || baseObj->GetFormType() != RE::FormType::Container) {
+                 return RE::BSContainer::ForEachResult::kContinue;
+@@ -629,7 +629,7 @@ namespace Services {
+         auto playerPos = player->GetPosition();
+         float maxRadius = a_maxDistance > 0.0f ? a_maxDistance : INISettings::GetSingleton()->GetMaxContainerDistance();
+ 
+-        cell->ForEachReference([&](RE::TESObjectREFR& ref) {
++        cell->ForEachReference([&](RE::TESObjectREFR* refPtr) { if (!refPtr) return RE::BSContainer::ForEachResult::kContinue; auto& ref = *refPtr;
+             auto* baseObj = ref.GetBaseObject();
+             if (!baseObj || baseObj->GetFormType() != RE::FormType::Container) {
+                 return RE::BSContainer::ForEachResult::kContinue;
+@@ -1686,3 +1686,4 @@ namespace Services {
+         ClearPlayerOverrides();
+     }
+ }
++
+diff --git a/src/main.cpp b/src/main.cpp
+index ac2ecf2..50a9e4f 100644
+--- a/src/main.cpp
++++ b/src/main.cpp
+@@ -20,8 +20,8 @@ extern "C" __declspec(dllexport) constinit auto SKSEPlugin_Version = []() {
+     v.PluginName(Version::NAME);
+     v.AuthorName(Version::AUTHOR);
+     v.UsesAddressLibrary();  // We resolve addresses via Address Library
+-    v.UsesNoStructs();       // We don't depend on game struct layouts
+-    // No CompatibleVersions - we validate Address Library at runtime and handle failures gracefully
++    v.UsesUpdatedStructs();  // Rebuilt with post-629 layouts for runtime 1.7.104.
++    v.CompatibleVersions({REL::Version(1, 7, 104, 0)});
+     return v;
+ }();
+ 
+@@ -510,3 +510,4 @@ SKSEPluginLoad(const SKSE::LoadInterface* a_skse) {
+     logger::info("{} loaded successfully", Version::NAME);
+     return true;
+ }
++

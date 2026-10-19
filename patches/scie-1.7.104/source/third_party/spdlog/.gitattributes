@@ -1,0 +1,4 @@
+* text=false
+
+# Preserve the archived source bytes in this review repository.
+* -text
